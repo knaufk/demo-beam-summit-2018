@@ -1,22 +1,22 @@
 version: "2.1"
 services:
   flink-job-server:
-    image: flink-job-server:2.7.0-fixed
+    image: beam/flink-job-server:2.13.0
     depends_on:
       - jobmanager
     volumes:
-     - beam-artifacts-staging-volume:/tmp/beam-artifact-staging # current limitation: job-server needs to have access to artifact staging area as taskmanagers
-    network_mode: "host"  # need use host networking for the SDK harness container to reach to taskmanager under localhost:<random-port>
-    command:  ["--flink-master-url=localhost:8081", ]
+     - beam-artifacts-staging-volume:/tmp/beam-artifact-staging
+    network_mode: "host"  # need use host networking for the SDK harness container to reach to taskmanager under localhost
+    command:  ["--flink-master-url=localhost:8081", "--artifacts-dir=/tmp/beam-artifact-staging" ]
   jobmanager:
-    image: flink:1.5.3-scala_2.11
+    image: flink:1.8.0-scala_2.11
     command: jobmanager
-    network_mode: "host" # need use host networking for the SDK harness container to reach to taskmanager under localhost:<random-port>
+    network_mode: "host" # need use host networking for the SDK harness container to reach to taskmanager under localhost
     environment:
     - JOB_MANAGER_RPC_ADDRESS=localhost
   taskmanager:
-    image: flink-with-docker:1.5.3-scala_2.11
-    network_mode: "host"  # need use host networking for the SDK harness container to reach to taskmanager under localhost:<random-port>
+    image: flink-with-docker:1.8.0-scala_2.11
+    network_mode: "host"  # need use host networking for the SDK harness container to reach to taskmanager under localhost
     depends_on:
     - jobmanager
     command: taskmanager
@@ -24,6 +24,6 @@ services:
     - JOB_MANAGER_RPC_ADDRESS=localhost
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # needs access to docker-socket of host machine
-      - beam-artifacts-staging-volume:/tmp/beam-artifact-staging # current limitation: job-server needs to have access to artifact staging area as taskmanagers
+      - beam-artifacts-staging-volume:/tmp/beam-artifact-staging
 volumes:
    beam-artifacts-staging-volume:

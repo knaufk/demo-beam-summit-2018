@@ -1,4 +1,4 @@
-FROM flink:1.5.3-scala_2.11
+FROM flink:1.8.0-scala_2.11
 
 ARG DOCKER_GID_HOST
 
