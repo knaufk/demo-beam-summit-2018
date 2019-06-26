@@ -8,15 +8,18 @@ First, checkout `release-2.13.0` of Apache Beam by running
 ```
 git clone git@github.com:apache/beam.git
 git checkout origin/release-2.13.0
-``` 
+```
+**Note:** Due to a bug in Beam 2.13.0 you need to checkout a branch containing a workaround (e.g. https://github.com/mxm/beam/tree/cross-language-kafka) in order to use external KafkaIOs.
+
 Afterwards you can build the job server image by running
 ```
 ./gradlew -p runners/flink/1.8/job-server-container docker -Pdocker-repository-root=beam -Pdocker-tag=2.13.0
 ```
-as well as the Python SDK harness container: 
+as well as the Python & Java SDK harness containers:
 
 ```
 ./gradlew -p sdks/python/container docker
+./gradlew -p sdks/java/container docker
 ```
 
 #### Building the Flink-With-Docker Image

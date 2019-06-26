@@ -5,9 +5,12 @@ import logging
 import re
 
 import apache_beam as beam
-from apache_beam.io import  ReadFromText
+from apache_beam.transforms import window
+from apache_beam.transforms import trigger
+from apache_beam.io.external.kafka import ReadFromKafka
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
+from apache_beam.transforms.trigger import AccumulationMode
 
 
 class LoggingDoFn(beam.DoFn):
@@ -22,8 +25,10 @@ def run(argv=None):
     pipeline_options.view_as(SetupOptions).save_main_session = True
     p = beam.Pipeline(options=pipeline_options)
 
-    (p | 'ReadFromFile' >> ReadFromText("/etc/profile")
-     | 'ExtractWords' >> beam.FlatMap(lambda x: re.findall(r'[A-Za-z\']+', x))
+    (p | 'ReadFromKafka' >> ReadFromKafka(consumer_config={"bootstrap.servers": "localhost:9092"},
+                                          topics=["beam-input"])
+     | 'ExtractWords' >> beam.FlatMap(lambda (k,v): re.findall(r'[A-Za-z\']+', v))
+     | 'Window' >> beam.WindowInto(window.GlobalWindows(), trigger=trigger.Repeatedly(trigger.AfterCount(1)), accumulation_mode=AccumulationMode.ACCUMULATING)
      | 'Count' >> beam.combiners.Count.PerElement()
      | 'Format' >> beam.Map(lambda word_count: '%s: %s' % (word_count[0], word_count[1]))
      | 'Log' >> beam.ParDo(LoggingDoFn()))
