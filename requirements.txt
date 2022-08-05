@@ -19,7 +19,7 @@ numpy==1.16.4
 oauth2client==3.0.0
 pbr==5.3.0
 protobuf==3.8.0
-pyarrow==0.13.0
+pyarrow==0.15.1
 pyasn1==0.4.5
 pyasn1-modules==0.2.5
 pydot==1.2.4
